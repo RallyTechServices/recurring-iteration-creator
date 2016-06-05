@@ -3,12 +3,12 @@
 <head>
     <title>Recurring Iteration Creator</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Sun Jun 05 2016 11:11:23 GMT-0700 (PDT) -->
+    <!--  Build Date: Sun Jun 05 2016 11:23:30 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sun Jun 05 2016 11:11:23 GMT-0700 (PDT)";
+        var APP_BUILD_DATE = "Sun Jun 05 2016 11:23:30 GMT-0700 (PDT)";
         var BUILDER = "jmartin";
-        var CHECKSUM = 6264805388;
+        var CHECKSUM = 6854008279;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -285,6 +285,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             items: [{
                 xtype:'container',
                 itemId:'message_box',
+                width: '100%',
                 padding: 5,
                 tpl:'<tpl><span class="warning">{message}</span></tpl>'
             },
@@ -324,6 +325,17 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                         change: this._checkDates
                     }
                 }]
+            },
+            {
+                xtype:'container',
+                itemId:'task_box',
+                padding: 5,
+                tpl:'<tpl><span>To Do:</span><br/><ul>' +
+                        '<li>Create this many sprints: {numberOfSprints}</li>' +
+                        '<li>Sprint length (days): {daysInSprint}</li>' +
+                        '<li>Starting: {startDate}</li>' +
+                        '<li>Ending: {endDate}</li>' +
+                        '</ul></tpl>'
             }]
         });
     },
@@ -491,7 +503,17 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         var start_date = this._getStartDateFromField();
         var end_date   = this._getEndDateFromField();
         
+        var days_in_sprint = Rally.util.DateTime.getDifference(end_date,start_date,'day') + 1;
+        var number_of_sprints = 1;
         
+        this.copy_config = {
+                numberOfSprints: number_of_sprints,
+                daysInSprint: days_in_sprint,
+                startDate: start_date,
+                endDate: end_date
+        };
+        
+        this.down('#task_box').update(this.copy_config);
     },
                     
     _create: function() {

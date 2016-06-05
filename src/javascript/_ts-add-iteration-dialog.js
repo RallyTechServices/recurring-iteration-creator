@@ -31,6 +31,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             items: [{
                 xtype:'container',
                 itemId:'message_box',
+                width: '100%',
                 padding: 5,
                 tpl:'<tpl><span class="warning">{message}</span></tpl>'
             },
@@ -70,6 +71,17 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                         change: this._checkDates
                     }
                 }]
+            },
+            {
+                xtype:'container',
+                itemId:'task_box',
+                padding: 5,
+                tpl:'<tpl><span>To Do:</span><br/><ul>' +
+                        '<li>Create this many sprints: {numberOfSprints}</li>' +
+                        '<li>Sprint length (days): {daysInSprint}</li>' +
+                        '<li>Starting: {startDate}</li>' +
+                        '<li>Ending: {endDate}</li>' +
+                        '</ul></tpl>'
             }]
         });
     },
@@ -237,7 +249,17 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         var start_date = this._getStartDateFromField();
         var end_date   = this._getEndDateFromField();
         
+        var days_in_sprint = Rally.util.DateTime.getDifference(end_date,start_date,'day') + 1;
+        var number_of_sprints = 1;
         
+        this.copy_config = {
+                numberOfSprints: number_of_sprints,
+                daysInSprint: days_in_sprint,
+                startDate: start_date,
+                endDate: end_date
+        };
+        
+        this.down('#task_box').update(this.copy_config);
     },
                     
     _create: function() {
