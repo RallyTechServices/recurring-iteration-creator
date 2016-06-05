@@ -64,6 +64,10 @@ Ext.define("TSRecurringIterationCreator", {
     
     _launchAddIterationDialog: function() {
         // TODO
+        Ext.create('CA.techservices.dialog.AddIterationDialog',{
+            width    : Ext.getBody().getWidth() - 20,
+            height   : Ext.getBody().getHeight() - 20
+        });
     },
       
     _loadWsapiRecords: function(config){

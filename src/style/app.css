@@ -15,3 +15,8 @@
     margin-right: 5px;
     cursor: pointer;
 }
+
+.warning {
+    color: red;
+    text-align: center;
+}
