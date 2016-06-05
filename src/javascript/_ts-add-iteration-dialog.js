@@ -120,7 +120,8 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         var start_field = this.down('#iteration_start_date'),
             end_field = this.down('#iteration_end_date'),
-            message_box = this.down('#message_box');
+            message_box = this.down('#message_box'),
+            children_box = this.down('#copy_to_children');
         
         message_box.update({message: ' '});
 
@@ -140,19 +141,72 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             return;
         }
         
-        
-        start_date = new Date(start_date.setHours(0,0,0,0));
-        end_date   = new Date(end_date.setHours(23,59,0,0));
+        start_date = Rally.util.DateTime.toIsoString(new Date(start_date.setHours(0,0,0,0)));
+        end_date   = Rally.util.DateTime.toIsoString(new Date(end_date.setHours(23,59,0,0)));
         
         console.log(start_date, end_date);
         
-        // TODO: check if there are existing iterations 
-        // TODO: check if there are existing iterations with children turned on
-        // TODO: check if there are existing iterations with recurrence turned on
-        // TODO: check if there are existing iterations with recurrence and children turned on
+        var start_inside_filters = Rally.data.wsapi.Filter.and([
+            {property:'StartDate',operator:'>=',value: start_date},
+            {property:'StartDate',operator:'<=',value: end_date}
+        ]);
         
-        if ( !Ext.isEmpty(button) ) { button.setDisabled(false); }
+        var end_inside_filters = Rally.data.wsapi.Filter.and([
+            {property:'EndDate',operator:'>=',value: start_date},
+            {property:'EndDate',operator:'<=',value: end_date}
+        ]);
         
+        var overlap_filters = Rally.data.wsapi.Filter.and([
+            {property:'StartDate',operator:'<=',value: start_date},
+            {property:'EndDate',operator:'>=',value: end_date}
+        ]);
+        
+        var filters = start_inside_filters.or(end_inside_filters.or(overlap_filters));
+        
+        
+        var config = {
+            model: 'Iteration',
+            filters: filters,
+            limit: 1,
+            pageSize: 1,
+            context: {
+                projectScopeDown: false,
+                projectScopeUp: false
+            }
+        };
+        
+        if ( children_box && children_box.getValue() == true ) {
+            config.context.projectScopeDown = true;
+        }
+        
+        TSUtils.loadWsapiRecords(config,true).then({
+            success: function(results) {
+                console.log('got:',results);
+                var count = results.resultSet.totalRecords;
+                console.log('count:', count);
+                if ( count > 0 ) {
+                    var verb = "is";
+                    var noun = "iteration";
+                    if ( count > 1 ) { 
+                        verb = "are";
+                        nount = "iterations";
+                    }
+                    var message = Ext.String.format("Warning.  There {0} {1} existing overlapping {2}.",
+                        verb,
+                        count,
+                        noun
+                    );
+                    message_box.update({message: message});
+                    // TODO: Calculate task
+                    // TODO: check if there are existing iterations with recurrence turned on
+                    // TODO: check if there are existing iterations with recurrence and children turned on
+                    if ( !Ext.isEmpty(button) ) { button.setDisabled(false); }
+                }
+            },
+            failure: function(msg) {
+                Ext.Msg.alert('Problem checking iterations', msg);
+            }
+        });        
     },
     
     _create: function() {

@@ -48,7 +48,7 @@ Ext.define("TSRecurringIterationCreator", {
             sorters: [{property:'EndDate',direction:'DESC'}]
         };
         
-        this._loadAStoreWithAPromise(config).then({
+        TSUtils.loadAStoreWithAPromise(config).then({
             scope: this,
             success: function(store) {
                 this._displayGrid(store,field_names);
@@ -68,54 +68,6 @@ Ext.define("TSRecurringIterationCreator", {
             width    : Ext.getBody().getWidth() - 20,
             height   : Ext.getBody().getHeight() - 20
         });
-    },
-      
-    _loadWsapiRecords: function(config){
-        var deferred = Ext.create('Deft.Deferred');
-        var me = this;
-        var default_config = {
-            model: 'Defect',
-            fetch: ['ObjectID']
-        };
-        
-        var full_config = Ext.Object.merge(default_config,config);
-        
-        this.logger.log("Starting load:",full_config.model);
-        Ext.create('Rally.data.wsapi.Store', full_config).load({
-            callback : function(records, operation, successful) {
-                if (successful){
-                    deferred.resolve(records);
-                } else {
-                    me.logger.log("Failed: ", operation);
-                    deferred.reject('Problem loading: ' + operation.error.errors.join('. '));
-                }
-            }
-        });
-        return deferred.promise;
-    },
-
-    _loadAStoreWithAPromise: function(config){
-        var deferred = Ext.create('Deft.Deferred');
-        var me = this;
-        var default_config = {
-            model: 'Defect',
-            fetch: ['ObjectID']
-        };
-        
-        var full_config = Ext.Object.merge(default_config,config);
-
-        this.logger.log("Starting load:",full_config.model);
-        Ext.create('Rally.data.wsapi.Store', full_config).load({
-            callback : function(records, operation, successful) {
-                if (successful){
-                    deferred.resolve(this);
-                } else {
-                    me.logger.log("Failed: ", operation);
-                    deferred.reject('Problem loading: ' + operation.error.errors.join('. '));
-                }
-            }
-        });
-        return deferred.promise;
     },
     
     _displayGrid: function(store,field_names){
