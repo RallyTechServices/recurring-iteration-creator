@@ -112,6 +112,31 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         });
     },
     
+    _getStartDateFromField:function(start_field){
+        if ( Ext.isEmpty(start_field) ) {
+            start_field = this.down('#iteration_start_date');
+        }
+        var start_date = start_field.getValue();
+        if ( Ext.isEmpty(start_date) ) { return null; }
+        return new Date(start_date.setHours(0,0,0,0));
+    },
+    
+    _getEndDateFromField:function(end_field){
+        if ( Ext.isEmpty(end_field) ) {
+            end_field = this.down('#iteration_end_date');
+        }
+        
+        var end_date = end_field.getValue();
+        if ( Ext.isEmpty(end_date) ) { return null; }
+        return new Date(end_date.setHours(23,59,0,0));
+    },
+
+    _copyToChildProjects: function() {
+        var children_box = this.down('#copy_to_children');
+        
+        if ( Ext.isEmpty(children_box) ) { return false; }
+        return children_box.getValue() || false;
+    },
     // update message_box if there are existing iterations
     // that overlap
     _checkDates: function() {
@@ -120,8 +145,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         var start_field = this.down('#iteration_start_date'),
             end_field = this.down('#iteration_end_date'),
-            message_box = this.down('#message_box'),
-            children_box = this.down('#copy_to_children');
+            message_box = this.down('#message_box');
         
         message_box.update({message: ' '});
 
@@ -129,8 +153,8 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             return;
         }
         
-        var start_date = start_field.getValue();
-        var end_date = end_field.getValue();
+        var start_date = this._getStartDateFromField(start_field);
+        var end_date = this._getEndDateFromField(end_field);
         
         if ( Ext.isEmpty(start_date) || Ext.isEmpty(end_date) ) {
             return;
@@ -141,8 +165,8 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             return;
         }
         
-        start_date = Rally.util.DateTime.toIsoString(new Date(start_date.setHours(0,0,0,0)));
-        end_date   = Rally.util.DateTime.toIsoString(new Date(end_date.setHours(23,59,0,0)));
+        start_date = Rally.util.DateTime.toIsoString(start_date);
+        end_date = Rally.util.DateTime.toIsoString(end_date);
         
         console.log(start_date, end_date);
         
@@ -163,7 +187,6 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         var filters = start_inside_filters.or(end_inside_filters.or(overlap_filters));
         
-        
         var config = {
             model: 'Iteration',
             filters: filters,
@@ -175,15 +198,17 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             }
         };
         
-        if ( children_box && children_box.getValue() == true ) {
+        if ( this._copyToChildProjects() ) {
             config.context.projectScopeDown = true;
         }
         
+        // TODO: check if there are existing iterations with recurrence turned on
+        // TODO: check if there are existing iterations with recurrence and children turned on
+
         TSUtils.loadWsapiRecords(config,true).then({
+            scope: this,
             success: function(results) {
-                console.log('got:',results);
                 var count = results.resultSet.totalRecords;
-                console.log('count:', count);
                 if ( count > 0 ) {
                     var verb = "is";
                     var noun = "iteration";
@@ -197,18 +222,24 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                         noun
                     );
                     message_box.update({message: message});
-                    // TODO: Calculate task
-                    // TODO: check if there are existing iterations with recurrence turned on
-                    // TODO: check if there are existing iterations with recurrence and children turned on
+                    
+                    this._setConfiguration();
                     if ( !Ext.isEmpty(button) ) { button.setDisabled(false); }
                 }
             },
             failure: function(msg) {
                 Ext.Msg.alert('Problem checking iterations', msg);
             }
-        });        
+        });
     },
     
+    _setConfiguration: function(){
+        var start_date = this._getStartDateFromField();
+        var end_date   = this._getEndDateFromField();
+        
+        
+    },
+                    
     _create: function() {
         
     }
