@@ -140,9 +140,12 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             return;
         }
         
+        
+        start_date = new Date(start_date.setHours(0,0,0,0));
+        end_date   = new Date(end_date.setHours(23,59,0,0));
+        
         console.log(start_date, end_date);
         
-        // TODO: set start and end ISO to midnight (and 11:59)
         // TODO: check if there are existing iterations 
         // TODO: check if there are existing iterations with children turned on
         // TODO: check if there are existing iterations with recurrence turned on
