@@ -91,6 +91,13 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                         scope: this,
                         change: this._checkDates
                     }
+                },
+                {
+                    xtype:'tsrecurrencepickerbutton',
+                    listeners: {
+                        scope: this,
+                        change: this._checkDates
+                    }
                 }]
             },
             {
@@ -104,14 +111,14 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                             '<li>Create this many (per proj): {numberOfSprints}</li>' +
                             '<li>Sprint length (days): {daysInSprint}</li>' +
                             '<li>Starting: {startDate}</li>' +
-                            '<li>Ending: {endDate}</li>' +
+                            '<li>Ending: {finalDate}</li>' +
                             '</ul></tpl>'
                 },
                 {
                     xtype:'textareafield',
                     itemId:'status_box',
                     html: '',
-                    width: 800,
+                    width: 600,
                     height: 275,
                     padding: 10
                 }]
@@ -190,7 +197,8 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         var start_field = this.down('#iteration_start_date'),
             end_field = this.down('#iteration_end_date'),
-            message_box = this.down('#message_box');
+            message_box = this.down('#message_box'),
+            repeat_field = this.down('tsrecurrencepickerbutton');
         
         message_box.update({message: ' '});
 
@@ -203,6 +211,18 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         if ( Ext.isEmpty(start_date) || Ext.isEmpty(end_date) ) {
             return;
+        }
+                
+        if ( !Ext.isEmpty(repeat_field) && !repeat_field.inactive ) {
+            var repeat_value = repeat_field.getValue();
+            if ( Ext.isEmpty(repeat_value) ) { 
+                message_box.update({message:'No reccurrence set (click button to remove)'});
+                return;
+            }
+            
+            if ( Ext.isDate(repeat_value) ) {
+                end_date = repeat_value;
+            } 
         }
         
         if ( end_date < start_date ) {
@@ -282,17 +302,43 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         var days_in_sprint = Rally.util.DateTime.getDifference(end_date,start_date,'day') + 1;
         var number_of_sprints = 1;
+        var final_date = end_date;
+        
+        var repeat_field = this.down('tsrecurrencepickerbutton');
+        if ( !Ext.isEmpty(repeat_field) && !repeat_field.inactive ) {
+            var repeat_value = repeat_field.getValue();
+          
+            if ( Ext.isDate(repeat_value) ) {
+                number_of_sprints = this._getNumberOfSprintsFromEndDate(start_date, repeat_value, days_in_sprint);
+            } 
+            
+            if ( Ext.isNumber(repeat_value) ) {
+                number_of_sprints = repeat_value;
+            }
+            
+            final_date = Rally.util.DateTime.add(end_date, 'day', ( number_of_sprints - 1 ) * days_in_sprint);
+        }
         
         this.copy_config = {
             numberOfSprints: number_of_sprints,
             daysInSprint: days_in_sprint,
             startDate: start_date,
-            endDate: end_date
+            endDate: end_date,
+            finalDate: final_date
         };
         
         this.down('#task_box').update(this.copy_config);
     },
-                    
+    
+    _getNumberOfSprintsFromEndDate: function(start_date, final_date, days_in_sprint) {
+        var counter = 0;
+        while(start_date <= final_date) {
+            counter++;
+            start_date = Rally.util.DateTime.add(start_date, 'day', days_in_sprint);
+        }
+        return counter;
+    },
+    
     _create: function() {
         var me = this;
         
@@ -314,19 +360,25 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                 
                 var promises = [];
                 
-                for ( var i=0; i<number_of_sprints; i++ ) {
+                Ext.Array.each(_.range(number_of_sprints), function(i) {
                     var name = Ext.Date.format(start_date, 'Y-m-d');
+                    var config = {
+                        name: name,
+                        startDate: start_date,
+                        endDate: end_date,
+                        projects: projects
+                    };
+                    
                     promises.push( function() {
-                        return this._createIterations(name,start_date,end_date,projects);
+                        return this._createIterations(config);
                     });
                     
                     start_date = Rally.util.DateTime.add(start_date, 'day', this.copy_config.daysInSprint);
                     end_date = Rally.util.DateTime.add(end_date, 'day', this.copy_config.daysInSprint);
-                }
+                },this);
                 
                 Deft.Chain.sequence(promises,this).then({
                     success: function(results) {
-                        //
                         me._checkDates();
                     },
                     failure: function(msg) {
@@ -421,9 +473,14 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         return deferred.promise;
     },
     
-    _createIterations: function(name,start_date,end_date,projects){
+    _createIterations: function(config){
         var deferred = Ext.create('Deft.Deferred'),
             me = this;
+        
+        var name = config.name;
+        var start_date = config.startDate;
+        var end_date = config.endDate;
+        var projects = config.projects;
         
         var promises = Ext.Array.map(projects, function(project){
             return function() {
@@ -450,9 +507,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
             State: 'Planning',
             Project: { _ref: project.get("_ref") }
         };
-        
-        console.log(fields);
-        
+                
         var iteration = Ext.create(this.iteration_model, fields);
         iteration.save({
             callback: function(result, operation) {
