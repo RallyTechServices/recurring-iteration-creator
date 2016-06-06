@@ -1,5 +1,9 @@
 #Recurring Iteration Creator
 
+WARNING!!! There is no undo.  You can create 100 iterations in 250 projects with this app.
+
+![ScreenShot](/images/screenshot.png)
+
 ## Development Notes
 
 ### First Load
