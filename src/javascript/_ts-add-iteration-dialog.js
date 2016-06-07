@@ -380,7 +380,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                 var prefix = this.down('#iteration_name_pattern').getValue() || "";
                 
                 Ext.Array.each(_.range(number_of_sprints), function(i) {
-                    var name = Ext.String.trim(prefix + " " + Ext.Date.format(start_date, 'Ymd'));
+                    var name = Ext.String.trim(prefix + " " + Ext.Date.format(end_date, 'Ymd'));
                     var config = {
                         name: name,
                         startDate: start_date,

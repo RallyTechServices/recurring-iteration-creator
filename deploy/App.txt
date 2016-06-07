@@ -3,12 +3,12 @@
 <head>
     <title>Recurring Iteration Creator</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Tue Jun 07 2016 13:39:16 GMT-0700 (PDT) -->
+    <!--  Build Date: Tue Jun 07 2016 13:59:12 GMT-0700 (PDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Jun 07 2016 13:39:16 GMT-0700 (PDT)";
+        var APP_BUILD_DATE = "Tue Jun 07 2016 13:59:12 GMT-0700 (PDT)";
         var BUILDER = "jmartin";
-        var CHECKSUM = 18610597102;
+        var CHECKSUM = 18606076414;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -778,7 +778,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                 var prefix = this.down('#iteration_name_pattern').getValue() || "";
                 
                 Ext.Array.each(_.range(number_of_sprints), function(i) {
-                    var name = Ext.String.trim(prefix + " " + Ext.Date.format(start_date, 'Ymd'));
+                    var name = Ext.String.trim(prefix + " " + Ext.Date.format(end_date, 'Ymd'));
                     var config = {
                         name: name,
                         startDate: start_date,

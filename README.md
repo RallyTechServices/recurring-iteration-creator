@@ -4,6 +4,8 @@ WARNING!!! There is no undo.  You can create 100 iterations in 250 projects with
 
 ![ScreenShot](/images/screenshot.png)
 
+There is now a box to input a prefix for the sprints that are created.  Put in "Fred", and the sprints will look like Fred 20160724" where the date is the last date of the sprint
+
 ## Development Notes
 
 ### First Load
