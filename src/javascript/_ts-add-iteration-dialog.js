@@ -15,7 +15,8 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
 
     initComponent: function() {
         this.callParent(arguments);
-        
+        Ext.tip.QuickTipManager.init();
+
         this._getIterationModel().then({
             scope: this,
             success: function(model) {
@@ -63,6 +64,24 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                     margins: '5 5 5 10'
                 },
                 items: [{
+                    xtype:'rallytextfield',
+                    itemId: 'iteration_name_pattern',
+                    fieldLabel: 'Name Prefix',
+                    labelWidth: 75,
+                    value: 'Sprint',
+                    height: 23,
+                    margins: '5 5 5 25',
+                    qtip: 'Sprints will be named with this followed by YYYYMMDD for final day',
+                    listeners: {
+                        render: function(c) {
+                            Ext.QuickTips.register({
+                                target: c.getEl(),
+                                text: c.qtip
+                            });
+                        }
+                    }
+                },
+                {
                     xtype:'rallydatefield',
                     itemId:'iteration_start_date',
                     fieldLabel: 'Start',
@@ -87,6 +106,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                     itemId:'copy_to_children',
                     boxLabelAlign: 'after',
                     boxLabel: 'Copy to child projects',
+                    margins: '0 5 5 10',
                     listeners: {
                         scope: this,
                         change: this._checkDates
@@ -127,8 +147,6 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
     },
 
     drawFooter: function() {
-        // TODO: Iteration recurrence button
-        // TODO: Iteration name pattern
         this.addDocked({
             xtype: 'toolbar',
             dock: 'bottom',
@@ -359,9 +377,10 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
                 this.setLoading(false);
                 
                 var promises = [];
+                var prefix = this.down('#iteration_name_pattern').getValue() || "";
                 
                 Ext.Array.each(_.range(number_of_sprints), function(i) {
-                    var name = Ext.Date.format(start_date, 'Y-m-d');
+                    var name = Ext.String.trim(prefix + " " + Ext.Date.format(start_date, 'Ymd'));
                     var config = {
                         name: name,
                         startDate: start_date,
