@@ -66,7 +66,8 @@ Ext.define("TSRecurringIterationCreator", {
         // TODO
         Ext.create('CA.techservices.dialog.AddIterationDialog',{
             width    : Ext.getBody().getWidth() - 20,
-            height   : Ext.getBody().getHeight() - 20
+            height   : Ext.getBody().getHeight() - 20,
+            context: this.getContext()
         });
     },
     

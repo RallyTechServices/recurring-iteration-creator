@@ -3,12 +3,12 @@
 <head>
     <title>Recurring Iteration Creator</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Tue Jun 07 2016 13:59:12 GMT-0700 (PDT) -->
+    <!--  Build Date: Mon Oct 17 2016 22:20:33 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Jun 07 2016 13:59:12 GMT-0700 (PDT)";
-        var BUILDER = "jmartin";
-        var CHECKSUM = 18606076414;
+        var APP_BUILD_DATE = "Mon Oct 17 2016 22:20:33 GMT-0600 (MDT)";
+        var BUILDER = "kcorkan";
+        var CHECKSUM = 18850181316;
     </script>
     
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
@@ -586,7 +586,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         }
         var start_date = start_field.getValue();
         if ( Ext.isEmpty(start_date) ) { return null; }
-        return new Date(start_date.setHours(0,0,0,0));
+        return  Rally.util.DateTime.convertFromEditing(start_date); //new Date(start_date.setHours(0,0,0,0));
     },
     
     _getEndDateFromField:function(end_field){
@@ -596,7 +596,8 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         var end_date = end_field.getValue();
         if ( Ext.isEmpty(end_date) ) { return null; }
-        return new Date(end_date.setHours(23,59,0,0));
+
+        return Rally.util.DateTime.convertFromEditing(end_date); //new Date(end_date.setHours(23,59,0,0));
     },
 
     _copyToChildProjects: function() {
@@ -1028,7 +1029,8 @@ Ext.define("TSRecurringIterationCreator", {
         // TODO
         Ext.create('CA.techservices.dialog.AddIterationDialog',{
             width    : Ext.getBody().getWidth() - 20,
-            height   : Ext.getBody().getHeight() - 20
+            height   : Ext.getBody().getHeight() - 20,
+            context: this.getContext()
         });
     },
     

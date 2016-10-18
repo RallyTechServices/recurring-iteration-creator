@@ -3,10 +3,10 @@
 <head>
     <title>Recurring Iteration Creator</title>
     <!--  (c) 2016 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Sun Jun 05 2016 14:56:42 GMT-0700 (PDT) -->
+    <!--  Build Date: Mon Oct 17 2016 22:20:34 GMT-0600 (MDT) -->
     
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Sun Jun 05 2016 14:56:42 GMT-0700 (PDT)";
+        var APP_BUILD_DATE = "Mon Oct 17 2016 22:20:34 GMT-0600 (MDT)";
         var CHECKSUM = [%= checksum %];
     </script>
     

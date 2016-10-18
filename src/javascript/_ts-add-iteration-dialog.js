@@ -188,7 +188,7 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         }
         var start_date = start_field.getValue();
         if ( Ext.isEmpty(start_date) ) { return null; }
-        return new Date(start_date.setHours(0,0,0,0));
+        return  Rally.util.DateTime.convertFromEditing(start_date); //new Date(start_date.setHours(0,0,0,0));
     },
     
     _getEndDateFromField:function(end_field){
@@ -198,7 +198,8 @@ Ext.define('CA.techservices.dialog.AddIterationDialog',{
         
         var end_date = end_field.getValue();
         if ( Ext.isEmpty(end_date) ) { return null; }
-        return new Date(end_date.setHours(23,59,0,0));
+
+        return Rally.util.DateTime.convertFromEditing(end_date); //new Date(end_date.setHours(23,59,0,0));
     },
 
     _copyToChildProjects: function() {
